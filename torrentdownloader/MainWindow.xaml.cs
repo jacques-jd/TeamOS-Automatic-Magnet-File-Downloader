@@ -41,7 +41,7 @@ namespace torrentdownloader
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-            var mld = new MagnetLinkDownloader(txtLocation.Text, new Label[2]{lblStatus,lblStatus2});
+            var mld = new TorrentLinkDownloader(txtLocation.Text, new Label[2]{lblStatus,lblStatus2});
 
             if (!int.TryParse(txtPagesStart.Text, out int startpages) || 
                 !int.TryParse(txtPagesMax.Text, out int endpages) || 
@@ -51,14 +51,14 @@ namespace torrentdownloader
                 !webBrowser.IsLoaded)
                 return;
 
-            mld.GetMagnetLinks(startpages, endpages, new decimal[] { minSize, maxSize }, cboSizeUnit.Text, webBrowser);
+            mld.GetTorrentLinks(startpages, endpages, new decimal[] { minSize, maxSize }, cboSizeUnit.Text, webBrowser);
 
             lblStatus.Content = "Status: Initialising...";
         }
 
     }
 
-    class MagnetLinkDownloader
+    class TorrentLinkDownloader
     {
         private List<WebBrowser> newPages;
         private List<string> downloads;
@@ -67,7 +67,7 @@ namespace torrentdownloader
         private string cookies;
         Label[] status;
 
-        public MagnetLinkDownloader(string dest, Label[] status)
+        public TorrentLinkDownloader(string dest, Label[] status)
         {
             destination = dest;
             downloads = new List<string>();
@@ -76,7 +76,7 @@ namespace torrentdownloader
             totalResults = 0;
         }
 
-        public void GetMagnetLinks(int startpages, int endpages, decimal[] size, string unit, System.Windows.Controls.WebBrowser auth)
+        public void GetTorrentLinks(int startpages, int endpages, decimal[] size, string unit, System.Windows.Controls.WebBrowser auth)
         {
             for (int i = startpages; i <= endpages; i++)
             {
@@ -86,11 +86,11 @@ namespace torrentdownloader
                 newPages.Add(newpage);
                 
                 newpage.Navigate($"{auth.Source.OriginalString}&page={i}");
-                newpage.DocumentCompleted += (sender, e) => GetMagnetLinksFromPage(newpage, size, unit);
+                newpage.DocumentCompleted += (sender, e) => GetTorrentLinksFromPage(newpage, size, unit);
             }
         }
 
-        private void GetMagnetLinksFromPage(WebBrowser auth, decimal[] sizes, string unit)
+        private void GetTorrentLinksFromPage(WebBrowser auth, decimal[] sizes, string unit)
         {
             status[0].Content = $"Status: Processing Page {auth.Url.ToString().Split('=').Last()}";
             cookies = WebHelper.GetGlobalCookies(auth.Url.AbsoluteUri);
@@ -189,7 +189,7 @@ namespace torrentdownloader
             else
             {
                 status[0].Content = "Status: Finished Downloading.";
-                status[1].Content = $"{totalResults} magnet files downloaded.";
+                status[1].Content = $"{totalResults} Torrent files downloaded.";
             }
                 
         }
