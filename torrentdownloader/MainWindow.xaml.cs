@@ -253,6 +253,7 @@ namespace torrentdownloader
                 newPages.Add(newpage);
                 newpage.Navigate(url);
 
+                //once page is done loading, execute this (and scroll to the end of the log)
                 newpage.DocumentCompleted += (sender, e) => { GetTorrentLinksFromPage(newpage, sizes, units); log.ScrollToEnd(); };
             }
         }
@@ -409,7 +410,6 @@ namespace torrentdownloader
                 return null;
             }
         }
-
     }
 }
 

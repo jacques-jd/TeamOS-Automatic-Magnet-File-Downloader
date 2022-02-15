@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:torrentdownloader"
         mc:Ignorable="d"
-        Title="TeamOS Bulk .torrent File Downloader v1.1" Height="575.552" Width="557.596" Loaded="Window_Loaded" ResizeMode="CanMinimize">
+        Title="TOS Bulk Downloader 1.1.1" Height="575.552" Width="557.596" Loaded="Window_Loaded" ResizeMode="CanMinimize" Icon="neublack.png">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="79*"/>
@@ -33,18 +33,18 @@
             </WebBrowser.RenderTransform>
         </WebBrowser>
         <Label Content="Authentication:" HorizontalAlignment="Left" Margin="10,46,0,0" Grid.Row="2" VerticalAlignment="Top" RenderTransformOrigin="0.124,-0.046" Height="26" Width="90"/>
-        <GroupBox Header="Search Criteria (Leave Blank for no search terms)" HorizontalAlignment="Left" Height="103" VerticalAlignment="Top" Width="532" Grid.ColumnSpan="4" Margin="10,0,0,0">
+        <GroupBox Header="Search Criteria (Leave Blank for no search terms)" HorizontalAlignment="Left" Height="103" VerticalAlignment="Top" Width="440" Grid.ColumnSpan="4" Margin="102,0,0,0">
             <Grid HorizontalAlignment="Left" Height="70" VerticalAlignment="Top" Width="522" Margin="0,0,-2,0">
                 <TextBox x:Name="txtUsername" HorizontalAlignment="Left" Height="23" Margin="73,1,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="162" TabIndex="0"/>
                 <Label x:Name="lblUsername" Content="Username:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="68" Margin="0,-3,0,0"/>
-                <TextBox x:Name="txtTag" HorizontalAlignment="Left" Height="23" Margin="350,1,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="162" TabIndex="1"/>
-                <Label x:Name="lblTag" Content="Tag:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="34" Margin="311,-3,0,0"/>
-                <CheckBox x:Name="chkFreeleech" Content="Freeleech only" HorizontalAlignment="Left" Margin="0,69,0,-14" VerticalAlignment="Top" TabIndex="3" Width="225"/>
-                <Label x:Name="txtCategory" Content="Category (cannot select parent categories):" HorizontalAlignment="Left" Margin="0,23,0,0" VerticalAlignment="Top" Width="235"/>
+                <TextBox x:Name="txtTag" HorizontalAlignment="Left" Height="23" Margin="274,1,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="151" TabIndex="1"/>
+                <Label x:Name="lblTag" Content="Tag:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="34" Margin="240,-3,0,0"/>
+                <CheckBox x:Name="chkFreeleech" Content="Freeleech only" HorizontalAlignment="Left" Margin="0,64,0,-9" VerticalAlignment="Top" TabIndex="3" Width="225"/>
+                <Label x:Name="txtCategory" Content="Category (cannot select parent categories):" HorizontalAlignment="Left" Margin="0,20,0,0" VerticalAlignment="Top" Width="235"/>
                 <ComboBox 
                           DisplayMemberPath="Value"
                           SelectedValuePath="Key"
-                    x:Name="cboCategory" HorizontalAlignment="Left" Margin="0,46,0,0" VerticalAlignment="Top" Width="512" TabIndex="2" SelectionChanged="cboCategory_SelectionChanged"/>
+                    x:Name="cboCategory" HorizontalAlignment="Left" Margin="0,42,0,0" VerticalAlignment="Top" Width="425" TabIndex="2" SelectionChanged="cboCategory_SelectionChanged"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Download Settings" HorizontalAlignment="Left" Height="163" VerticalAlignment="Top" Width="200" Grid.ColumnSpan="2" Margin="95,0,0,0" Grid.Column="2" Grid.Row="1" Grid.RowSpan="2">
@@ -67,6 +67,7 @@
         <GroupBox Header="Log" HorizontalAlignment="Left" Height="163" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="306" Grid.ColumnSpan="3" Grid.RowSpan="2">
         </GroupBox>
         <local:Log x:Name="txtLog" HorizontalAlignment="Left" Height="143" Margin="10,20,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="306" Grid.ColumnSpan="3" Grid.RowSpan="2" Padding="5" IsReadOnly="True" Panel.ZIndex="2" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Consolas" FontSize="10" VerticalScrollBarVisibility="Visible"/>
+        <Image HorizontalAlignment="Left" Height="93" Margin="6,6,0,0" VerticalAlignment="Top" Width="92" Source="neublack.png"/>
 
     </Grid>
 </Window>
