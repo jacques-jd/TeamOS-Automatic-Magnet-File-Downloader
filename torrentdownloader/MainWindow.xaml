@@ -65,8 +65,8 @@
 
         </GroupBox>
         <GroupBox Header="Log" HorizontalAlignment="Left" Height="163" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="306" Grid.ColumnSpan="3" Grid.RowSpan="2">
-            <TextBox x:Name="txtLog" HorizontalAlignment="Left" Height="141" TextWrapping="Wrap" VerticalAlignment="Top" Width="296" Grid.RowSpan="2" VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" IsReadOnly="True" IsUndoEnabled="False" FontFamily="Consolas" FontSize="10" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,-2,-1" BorderBrush="{x:Null}"/>
         </GroupBox>
+        <local:Log x:Name="txtLog" HorizontalAlignment="Left" Height="143" Margin="10,20,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="306" Grid.ColumnSpan="3" Grid.RowSpan="2" Padding="5" IsReadOnly="True" Panel.ZIndex="2" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Consolas" FontSize="10" VerticalScrollBarVisibility="Visible"/>
 
     </Grid>
 </Window>

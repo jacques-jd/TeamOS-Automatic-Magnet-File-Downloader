@@ -26,31 +26,36 @@ namespace DebugApp
                 decimal.TryParse(source[0], out decimal torSize);
                 string torUnit = source[1];
 
-                switch (units[0]) //minimum size check
+                if (sizes[0] > 0) //only execute min size check if it's not a 0 value
                 {
-                    case "MB":
-                        if (torSize < sizes[0] && torUnit == units[0])
-                            Console.WriteLine("min size. Fail 1.");
-                        break;
-                    case "GB":
-                        if (torUnit == "MB")
-                            Console.WriteLine("min size. Fail 2.");
-                        if (torSize < sizes[0])
-                            Console.WriteLine("min size. Fail 3.");
-                        break;
+                    switch (units[0]) //minimum size check
+                    {
+                        case "MB":
+                            if (torUnit == "KB")
+                                Console.WriteLine("KB, min size is MB");
+                            if (torSize < sizes[0] && torUnit == units[0])
+                                Console.WriteLine("Min size MB, smaller than min size");
+                            break;
+                        case "GB":
+                            if (torUnit == "MB")
+                                Console.WriteLine("Min size is GB and torrent is MB");
+                            if (torSize < sizes[0])
+                                Console.WriteLine("Min size is GB, smaller than Min Size");
+                            break;
+                    }
                 }
 
                 switch (units[1]) //maximum size check
                 {
                     case "MB":
                         if (torUnit == "GB")
-                            Console.WriteLine("max size. Fail 1.");
-                        if (torSize > sizes[1])
-                            Console.WriteLine("max size. Fail 2.");
+                            Console.WriteLine("Max size is MB and torrent is GB");
+                        if (torSize > sizes[1] && torUnit != "KB")
+                            Console.WriteLine("Max size is MB, torrent is larger than max size and is not KB");
                         break;
                     case "GB":
                         if (torSize > sizes[1] && torUnit == units[1])
-                            Console.WriteLine("max size. Fail 3.");
+                            Console.WriteLine("Max size is GB. Torrent is larger than max size.");
                         break;
                 }
             } while (true);

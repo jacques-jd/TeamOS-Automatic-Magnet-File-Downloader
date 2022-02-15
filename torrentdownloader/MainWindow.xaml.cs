@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WebBrowser = System.Windows.Forms.WebBrowser;
 using TextBox = System.Windows.Controls.TextBox;
+using System.Threading;
 
 namespace torrentdownloader
 {
@@ -16,6 +17,7 @@ namespace torrentdownloader
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         private string link;
         Dictionary<int, string> categories = new Dictionary<int, string>()
             {
@@ -107,6 +109,7 @@ namespace torrentdownloader
             { 87, "    ↳Wallpapers, Themes &amp; Screensavers"},
             { 89, "    ↳Other Releases"},
             };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -114,18 +117,23 @@ namespace torrentdownloader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //Populate size unit choices
             cboSizeUnit1.ItemsSource = cboSizeUnit2.ItemsSource = new List<string>() { "MB", "GB" };
             cboSizeUnit1.SelectedIndex = cboSizeUnit2.SelectedIndex = 0;
+
+            //initialise webbrowser location
             link = "https://teamos-hkrg.com/torrents/?direction=DESC";
             webBrowser.Navigate(link);
 
+            //initialise categories
             ImportCategories();
         }
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-            var mld = new TorrentLinkDownloader(txtLocation.Text, txtLog);
+           
 
+            //make sure all fields are filled out properly
             if (!int.TryParse(txtPagesStart.Text, out int startpages) ||
                 !int.TryParse(txtPagesMax.Text, out int endpages) ||
                 !decimal.TryParse(txtSizeMin.Text, out decimal minSize) ||
@@ -135,22 +143,32 @@ namespace torrentdownloader
                 !webBrowser.IsLoaded)
                 return;
 
+            //passes File location and the Information log into the torrent link class
+            var mld = new TorrentLinkDownloader(txtLocation.Text, txtLog);
+
+            //parses the search criteria into $GET url params
             string args = CreateArgs();
 
             txtLog.Text = "> Status: Initialising...\r\n";
 
-            mld.GetTorrentLinks(startpages, endpages, new decimal[] { minSize, maxSize }, new string[] { cboSizeUnit1.Text, cboSizeUnit2.Text }, webBrowser, args);
+            //Logic Entrypoint.
+            //Passing all search criteria into the method.
+            // (int[] pagebounds, decimal[] sizebounds, string[] sizeboundunits, WebBrowser authentication, GET arguments)
+            mld.GetTorrentLinks(new int[] { startpages, endpages }, new decimal[] { minSize, maxSize }, new string[] { cboSizeUnit1.Text, cboSizeUnit2.Text }, webBrowser, args);
 
-            
+            //scroll to end of log because it doesn't work when I call it from other places
+            txtLog.ScrollToEnd();
         }
 
         private void ImportCategories()
         {
+            //This populates the categories combobox with the Dictionary's values, while associating their keys too. Allows for dynamic getting of category pages
             cboCategory.ItemsSource = categories.Select(kvp => new CustomKeyValuePair<int, string> { Key = kvp.Key, Value = kvp.Value });
         }
 
         private void cboCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            //Filters out parent categories (which display nothing on their pages)
             switch(cboCategory.SelectedIndex)
             {
                 case 1:
@@ -176,6 +194,7 @@ namespace torrentdownloader
             }
         }
 
+        //just creates the GET url params
         private string CreateArgs()
         {
             string args = "";
@@ -193,16 +212,23 @@ namespace torrentdownloader
         }
     }
 
+    //All the logic is here
     class TorrentLinkDownloader
     {
+        //newPages keeps count of all the WebBrowsers open
         private List<WebBrowser> newPages;
+        //downloads is where all the download links go
         private List<string> downloads;
+        //totalResults is a tally of all the valid torrent links that have been downloaded
         int totalResults;
+        //destination is the file destination
         private string destination;
+        //cookies stores the session cookies for auth
         private string cookies;
-        TextBox log;
+        //log is the output log of the program
+        Log log;
 
-        public TorrentLinkDownloader(string dest, TextBox log)
+        public TorrentLinkDownloader(string dest, Log log)
         {
             destination = dest;
             downloads = new List<string>();
@@ -211,20 +237,23 @@ namespace torrentdownloader
             totalResults = 0;
         }
 
-        public void GetTorrentLinks(int startpages, int endpages, decimal[] sizes, string[] units, System.Windows.Controls.WebBrowser auth, string args)
+        
+        public void GetTorrentLinks(int[] pages, decimal[] sizes, string[] units, System.Windows.Controls.WebBrowser auth, string args)
         {
-            for (int i = startpages; i <= endpages; i++)
+            //loops this code once for every page needed
+            for (int i = pages[0]; i <= pages[1]; i++)
             {
+                //creates a url based on the GET params + current page
                 string url = $"{auth.Source.OriginalString}{args}&page={i}";
-                log.AppendText($"> Fetching: {url}\r\n");
 
+                log.WriteLine($"> Fetching: {url}");
+
+                //create a new webbrowser object
                 WebBrowser newpage = new WebBrowser();
-
                 newPages.Add(newpage);
-
                 newpage.Navigate(url);
-                
-                newpage.DocumentCompleted += (sender, e) => GetTorrentLinksFromPage(newpage, sizes, units);
+
+                newpage.DocumentCompleted += (sender, e) => { GetTorrentLinksFromPage(newpage, sizes, units); log.ScrollToEnd(); };
             }
         }
 
@@ -246,12 +275,14 @@ namespace torrentdownloader
             if (torrents.Count < 1)
             {
                 //pages are empty.
-                log.AppendText("> Empty Page\r\n");
+                newPages.Remove(auth);
+                auth.Dispose();
+                log.WriteLine("> Empty Page");
                 log.ScrollToEnd();
                 return;
             }
 
-            log.AppendText($"> Processing Page {auth.Url.ToString().Split('=').Last()}\r\n");
+            log.WriteLine($"> Processing Page {auth.Url.ToString().Split('=').Last()}");
             cookies = WebHelper.GetGlobalCookies(auth.Url.AbsoluteUri);
 
             foreach (HtmlElement tor in torrents)
@@ -265,18 +296,23 @@ namespace torrentdownloader
                 decimal.TryParse(sourcesize[0], out decimal torSize);
                 string torUnit = sourcesize[1];
 
-                switch (units[0]) //minimum size check
+                if(sizes[0] > 0) //only execute min size check if it's not a 0 value
                 {
-                    case "MB":
-                        if (torSize < sizes[0] && torUnit == units[0])
-                            continue;
-                        break;
-                    case "GB":
-                        if (torUnit == "MB")
-                            continue;
-                        if (torSize < sizes[0])
-                            continue;
-                        break;
+                    switch (units[0]) //minimum size check
+                    {
+                        case "MB":
+                            if (torUnit == "KB")
+                                continue;
+                            if (torSize < sizes[0] && torUnit == units[0])
+                                continue;
+                            break;
+                        case "GB":
+                            if (torUnit == "MB")
+                                continue;
+                            if (torSize < sizes[0])
+                                continue;
+                            break;
+                    }
                 }
 
                 switch (units[1]) //maximum size check
@@ -284,7 +320,7 @@ namespace torrentdownloader
                     case "MB":
                         if (torUnit == "GB")
                             continue;
-                        if (torSize > sizes[1])
+                        if (torSize > sizes[1] && torUnit != "KB")
                             continue;
                         break;
                     case "GB":
@@ -292,6 +328,8 @@ namespace torrentdownloader
                             continue;
                         break;
                 }
+
+
 
                 string dllink = innerTable.Children[2].Children[0].GetAttribute("href");
 
@@ -301,17 +339,17 @@ namespace torrentdownloader
                 if (System.IO.File.Exists($"{destination}{(destination.EndsWith("/") ? "" : "/")}{filename}"))
                 {
                     //Console.WriteLine($"{filename} already exists");
-                    log.AppendText($"> Found file that already exists, skipping...\r\n");
+                    log.WriteLine($"> Found file that already exists, skipping...");
                     continue;
                 }
 
-                log.AppendText($"> Downloading {filename} ({torSize}{sourcesize[1]})\r\n");
+                log.WriteLine($"> Downloading {filename} ({torSize}{sourcesize[1]})");
 
                 downloads.Add(dllink);
                 totalResults++;
             }
 
-            log.AppendText($"> So far found {totalResults} total results\r\n");
+            log.WriteLine($"> So far found {totalResults} total results");
 
             using (var client = new System.Net.WebClient())
             {
@@ -324,11 +362,11 @@ namespace torrentdownloader
                     try
                     {
                         client.DownloadFile(link, $"{destination}{(destination.EndsWith("/") ? "" : "/")}{filename}");
-                        log.AppendText($"> Downloaded {filename}\r\n");
+                        log.WriteLine($"> Downloaded {filename}");
                     }
                     catch (System.Net.WebException ex)
                     {
-                        log.AppendText("> error: " + ex.Message + "\r\n");
+                        log.WriteLine("> error: " + ex.Message + "");
                     }
                 }
 
@@ -338,16 +376,14 @@ namespace torrentdownloader
             newPages.Remove(auth);
             auth.Dispose();
             Console.WriteLine("Finished downloads on page " + doc.Url.ToString().Split('=').Last() + ", disposed webbrowser");
-            log.AppendText("> Finished downloads on page " + doc.Url.ToString().Split('=').Last() + ", disposed webbrowser\r\n");
+            log.WriteLine("> Finished downloads on page " + doc.Url.ToString().Split('=').Last() + ", disposed webbrowser");
             if (newPages.Count > 0)
             {
-                log.AppendText(newPages.Count() + " pages to go\r\n");
+                log.WriteLine("> " + newPages.Count() + " pages to go");
             }
             else
             {
-                log.AppendText("> Finished Downloading.\r\n");
-                log.AppendText($"> {totalResults} Torrent files downloaded.\r\n");
-                log.ScrollToEnd();
+                log.WriteLine($"> Finished downloading {totalResults} torrent files");
             }
 
         }
