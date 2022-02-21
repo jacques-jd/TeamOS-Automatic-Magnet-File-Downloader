@@ -1,1 +1,1 @@
-TeamOS Auto Magnet file fetcher
+TeamOS Automatic Torrent File Fetcher
