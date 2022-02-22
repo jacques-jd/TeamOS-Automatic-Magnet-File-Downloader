@@ -118,6 +118,9 @@ namespace torrentdownloader
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //set location if settings exists
+            txtLocation.Text = Properties.Settings.Default.Location;
+
             //Populate size unit choices
             cboSizeUnit1.ItemsSource = cboSizeUnit2.ItemsSource = new List<string>() { "MB", "GB" };
             cboSizeUnit1.SelectedIndex = cboSizeUnit2.SelectedIndex = 0;
@@ -217,6 +220,13 @@ namespace torrentdownloader
             {
                 txtLocation.Text = dialog.SelectedPath;
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            //save settings (basically folder location)
+            Properties.Settings.Default.Location = txtLocation.Text;
+            Properties.Settings.Default.Save();
         }
     }
 
