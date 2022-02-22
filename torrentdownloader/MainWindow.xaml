@@ -49,7 +49,7 @@
         </GroupBox>
         <GroupBox Header="Download Settings" HorizontalAlignment="Left" Height="163" VerticalAlignment="Top" Width="200" Grid.ColumnSpan="2" Margin="95,0,0,0" Grid.Column="2" Grid.Row="1" Grid.RowSpan="2">
             <Grid HorizontalAlignment="Left" Height="162" VerticalAlignment="Top" Width="190" Margin="0,0,-2,-2">
-                <TextBox x:Name="txtLocation" Margin="0,0,0,113" Text="F:/#Small Torrent Links/AutoDownloads" Height="23" VerticalAlignment="Bottom" MaxLines="1" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Disabled" TabIndex="4"/>
+                <TextBox x:Name="txtLocation" Margin="0,0,0,113" Text="H:/#Small Torrent Links/AutoDownloads" Height="23" VerticalAlignment="Bottom" MaxLines="1" ScrollViewer.CanContentScroll="True" VerticalScrollBarVisibility="Disabled" TabIndex="4"/>
                 <Label x:Name="lblLocation" Content="Location:" Margin="0,0,75,136" Height="26" VerticalAlignment="Bottom" RenderTransformOrigin="0.94,0.115" HorizontalAlignment="Right" Width="115"/>
                 <Label Content="To" HorizontalAlignment="Left" Margin="108,57,0,0" VerticalAlignment="Top" Height="26" Width="27"/>
                 <TextBox x:Name="txtPagesMax" Margin="135,0,10,81" TextWrapping="Wrap" Text="10" Height="23" VerticalAlignment="Bottom" TabIndex="6"/>
@@ -61,6 +61,7 @@
                 <TextBox x:Name="txtPagesStart" Margin="65,0,83,82" TextWrapping="Wrap" Text="1" Height="23" VerticalAlignment="Bottom" TabIndex="5"/>
                 <TextBox x:Name="txtSizeMax" Margin="65,0,60,23" TextWrapping="Wrap" Text="100" Height="23" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" TabIndex="9"/>
                 <ComboBox x:Name="cboSizeUnit1" HorizontalAlignment="Left" Margin="135,88,0,0" VerticalAlignment="Top" Width="45" Height="22" TabIndex="8"/>
+                <Button x:Name="button" Content="Browse" HorizontalAlignment="Left" Margin="65,3,0,0" VerticalAlignment="Top" Width="70" Click="button_Click"/>
             </Grid>
 
         </GroupBox>

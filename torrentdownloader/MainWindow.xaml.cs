@@ -18,6 +18,7 @@ namespace torrentdownloader
     public partial class MainWindow : Window
     {
         
+        
         private string link;
         Dictionary<int, string> categories = new Dictionary<int, string>()
             {
@@ -131,8 +132,6 @@ namespace torrentdownloader
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
         {
-           
-
             //make sure all fields are filled out properly
             if (!int.TryParse(txtPagesStart.Text, out int startpages) ||
                 !int.TryParse(txtPagesMax.Text, out int endpages) ||
@@ -209,6 +208,15 @@ namespace torrentdownloader
                 args += "&tag=" + txtTag.Text.Replace(' ', '+');
 
             return args;
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            if (dialog.ShowDialog(this).GetValueOrDefault())
+            {
+                txtLocation.Text = dialog.SelectedPath;
+            }
         }
     }
 
@@ -368,6 +376,8 @@ namespace torrentdownloader
                     catch (System.Net.WebException ex)
                     {
                         log.WriteLine("> error: " + ex.Message + "");
+                        Console.WriteLine(ex.StackTrace);
+                        Console.WriteLine(ex.Data);
                     }
                 }
 
@@ -385,6 +395,7 @@ namespace torrentdownloader
             else
             {
                 log.WriteLine($"> Finished downloading {totalResults} torrent files");
+                if (newPages.Count > 0) newPages.ForEach(page => page.Dispose());
             }
 
         }
