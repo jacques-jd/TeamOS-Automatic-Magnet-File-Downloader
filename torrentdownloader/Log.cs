@@ -9,7 +9,6 @@ namespace torrentdownloader
         {
             AppendText(text + "\r\n");
             ScrollToEnd();
-            ScrollToLine(GetLastVisibleLineIndex());
         }
     }
 }

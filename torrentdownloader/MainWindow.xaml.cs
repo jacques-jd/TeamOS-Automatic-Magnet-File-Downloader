@@ -17,8 +17,6 @@ namespace torrentdownloader
     /// </summary>
     public partial class MainWindow : Window
     {
-        
-        
         private string link;
         Dictionary<int, string> categories = new Dictionary<int, string>()
             {
@@ -131,6 +129,14 @@ namespace torrentdownloader
 
             //initialise categories
             ImportCategories();
+
+            //add warning
+            txtLog.Text = $"**********WARNING***********\r\n" +
+                $"USE THIS TOOL AT YOUR OWN RISK. BY IMPORTING LARGE AMOUNTS OF TORRENTS INTO YOUR TORRENT PROGRAM, " +
+                $"YOU RUN THE RISK OF RUINING YOUR RATIO. ALWAYS MAKE SURE YOU HAVE ENOUGH RATIO TO DOWNLOAD THE TOTAL SIZE." +
+                $"\r\n-------------\r\n" +
+                $"When finished downloading, the total size of all the torrents will be displayed. This is not the size" +
+                $" of the torrent files, but the size of their contents, once you import them into your torrenting program.";
         }
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
@@ -215,11 +221,13 @@ namespace torrentdownloader
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-            if (dialog.ShowDialog(this).GetValueOrDefault())
+            using (var dialog = new FolderBrowserDialog())
             {
-                txtLocation.Text = dialog.SelectedPath;
+                DialogResult dg = dialog.ShowDialog();
+                if(dg == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                    txtLocation.Text = dialog.SelectedPath;
             }
+                
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -239,6 +247,7 @@ namespace torrentdownloader
         private List<string> downloads;
         //totalResults is a tally of all the valid torrent links that have been downloaded
         int totalResults;
+        int totalResultsSize; //total size in MB
         //destination is the file destination
         private string destination;
         //cookies stores the session cookies for auth
@@ -253,6 +262,7 @@ namespace torrentdownloader
             newPages = new List<WebBrowser>();
             this.log = log;
             totalResults = 0;
+            totalResultsSize = 0;
         }
 
         
@@ -366,9 +376,16 @@ namespace torrentdownloader
 
                 downloads.Add(dllink);
                 totalResults++;
-            }
 
-            log.WriteLine($"> So far found {totalResults} total results");
+                if (torUnit == "GB")
+                {
+                    totalResultsSize += (int)((double)torSize * 1024);
+                }
+                else
+                {
+                    totalResultsSize += (int)torSize;
+                }
+            }
 
             using (var client = new System.Net.WebClient())
             {
@@ -401,10 +418,18 @@ namespace torrentdownloader
             if (newPages.Count > 0)
             {
                 log.WriteLine("> " + newPages.Count() + " pages to go");
+                if (totalResultsSize > 1024m)
+                    log.WriteLine($"> So far found {totalResults} total results (~{(double)(totalResultsSize / 1024):N}GB)");
+                else
+                    log.WriteLine($"> So far found {totalResults} total results (~{(double)(totalResultsSize):N}MB)");
             }
             else
             {
-                log.WriteLine($"> Finished downloading {totalResults} torrent files");
+                if (totalResultsSize > 1024m)
+                    log.WriteLine($"> Finished Downloading {totalResults} total results (~{(double)(totalResultsSize / 1024):N}GB)");
+                else
+                    log.WriteLine($"> Finished Downloadeding {totalResults} total results (~{(double)(totalResultsSize):N}MB)");
+
                 if (newPages.Count > 0) newPages.ForEach(page => page.Dispose());
             }
 
