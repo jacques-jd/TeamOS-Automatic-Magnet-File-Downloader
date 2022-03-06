@@ -236,6 +236,19 @@ namespace torrentdownloader
             Properties.Settings.Default.Location = txtLocation.Text;
             Properties.Settings.Default.Save();
         }
+
+        private void btnOpen_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(txtLocation.Text);
+            } 
+            catch (Exception ex)
+            {
+                txtLog.Text += "\r\n-- Error: Invalid Folder Location --";
+                txtLog.ScrollToEnd();
+            }
+        }
     }
 
     //All the logic is here
