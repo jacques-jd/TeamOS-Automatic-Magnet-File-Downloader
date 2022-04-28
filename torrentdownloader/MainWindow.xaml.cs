@@ -6,9 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using WebBrowser = System.Windows.Forms.WebBrowser;
-using TextBox = System.Windows.Controls.TextBox;
 using System.Threading;
+using Microsoft.Web.WebView2.Wpf;
+using Microsoft.Web.WebView2.Core;
+using HtmlAgilityPack;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace torrentdownloader
 {
@@ -124,8 +126,8 @@ namespace torrentdownloader
             cboSizeUnit1.SelectedIndex = cboSizeUnit2.SelectedIndex = 0;
 
             //initialise webbrowser location
-            link = "https://teamos-hkrg.com/torrents/?direction=DESC";
-            webBrowser.Navigate(link);
+            //link = "https://teamos-hkrg.com/torrents/?direction=DESC";
+            //webBrowser.CoreWebView2.Navigate(link);
 
             //initialise categories
             ImportCategories();
@@ -255,7 +257,7 @@ namespace torrentdownloader
     class TorrentLinkDownloader
     {
         //newPages keeps count of all the WebBrowsers open
-        private List<WebBrowser> newPages;
+        private List<WebView2> newPages;
         //downloads is where all the download links go
         private List<string> downloads;
         //totalResults is a tally of all the valid torrent links that have been downloaded
@@ -272,14 +274,14 @@ namespace torrentdownloader
         {
             destination = dest;
             downloads = new List<string>();
-            newPages = new List<WebBrowser>();
+            newPages = new List<WebView2>();
             this.log = log;
             totalResults = 0;
             totalResultsSize = 0;
         }
 
         
-        public void GetTorrentLinks(int[] pages, decimal[] sizes, string[] units, System.Windows.Controls.WebBrowser auth, string args)
+        public async void GetTorrentLinks(int[] pages, decimal[] sizes, string[] units, WebView2 auth, string args)
         {
             //loops this code once for every page needed
             for (int i = pages[0]; i <= pages[1]; i++)
@@ -290,20 +292,32 @@ namespace torrentdownloader
                 log.WriteLine($"> Fetching: {url}");
 
                 //create a new webbrowser object
-                WebBrowser newpage = new WebBrowser();
+                WebView2 newpage = new WebView2();
                 newPages.Add(newpage);
-                newpage.Navigate(url);
+                newpage.Loaded += async (sender, e) =>
+                {
+                    Console.WriteLine("hello");
 
-                //once page is done loading, execute this (and scroll to the end of the log)
-                newpage.DocumentCompleted += (sender, e) => { GetTorrentLinksFromPage(newpage, sizes, units); log.ScrollToEnd(); };
+                    var webView2Environment = await CoreWebView2Environment.CreateAsync();
+                    await newpage.EnsureCoreWebView2Async(webView2Environment);
+
+                    newpage.CoreWebView2.Navigate(url);
+                    
+                    //once page is done loading, execute this (and scroll to the end of the log)
+                    newpage.NavigationCompleted += (_s, _e) => { GetTorrentLinksFromPage(newpage, sizes, units); log.ScrollToEnd(); };
+                };
             }
         }
 
-        private void GetTorrentLinksFromPage(WebBrowser auth, decimal[] sizes, string[] units)
+        private async void GetTorrentLinksFromPage(WebView2 auth, decimal[] sizes, string[] units)
         {
-            HtmlDocument doc = auth.Document;
+            string html = await auth.ExecuteScriptAsync("document.documentElement.outerHTML");
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(html);
+            Console.WriteLine(html);
+            return;
 
-            List<HtmlElement> torrents = new List<HtmlElement>();
+           /* List<HtmlElement> torrents = new List<HtmlElement>();
 
             foreach (HtmlElement d in doc.All)
             {
@@ -324,8 +338,8 @@ namespace torrentdownloader
                 return;
             }
 
-            log.WriteLine($"> Processing Page {auth.Url.ToString().Split('=').Last()}");
-            cookies = WebHelper.GetGlobalCookies(auth.Url.AbsoluteUri);
+            log.WriteLine($"> Processing Page {auth.Source.ToString().Split('=').Last()}");
+            cookies = WebHelper.GetGlobalCookies(auth.Source.AbsoluteUri);
 
             foreach (HtmlElement tor in torrents)
             {
@@ -445,7 +459,7 @@ namespace torrentdownloader
 
                 if (newPages.Count > 0) newPages.ForEach(page => page.Dispose());
             }
-
+            */
         }
     }
     public class WebHelper
