@@ -124,7 +124,7 @@ namespace torrentdownloader
             cboSizeUnit1.SelectedIndex = cboSizeUnit2.SelectedIndex = 0;
 
             //initialise webbrowser location
-            link = "https://teamos-hkrg.com/torrents/?direction=DESC";
+            link = "https://teamos.xyz/torrents/?direction=DESC";
             webBrowser.Navigate(link);
 
             //initialise categories
